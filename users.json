@@ -1,0 +1,74 @@
+[
+  {
+    "user_id": "U0001",
+    "name": "Chief Administrator",
+    "email": "admin@freshtrace.org",
+    "passwordHash": "scrypt$7edcdaa717ccbb03ce69bfe9b9b080ff$dbbdff3c9982cc8fc466bf5d249d39c193b0a65c63aa495a6ecc03d8cf8d4e914e4752bd2c18be3a438270a227d9706166abf2ad0eb58393570a8829ee1cd0b0",
+    "phone": "+91 98100 00001",
+    "role": "admin",
+    "status": "active",
+    "verified": true,
+    "facility": "FreshTrace Central Operations",
+    "created_at": "2026-11-18T04:53:25.126Z"
+  },
+  {
+    "user_id": "U0002",
+    "name": "Ramesh Patel",
+    "email": "farmer.ramesh@greenvalley.com",
+    "passwordHash": "scrypt$bc1930ad36e846b0fedaa4b5a35829c1$65b297235cac3229013c3c9b873734014bd9a2e14e1b8454ee2ad45115aa302309acb6c0edd9fd74ab49ceed227872505fe6cdd9f98ce569ed54d36a4772b8e8",
+    "phone": "+91 98160 44219",
+    "role": "farmer",
+    "status": "active",
+    "verified": true,
+    "facility": "Green Valley Organic Farm",
+    "created_at": "2026-11-18T04:53:25.126Z"
+  },
+  {
+    "user_id": "U0003",
+    "name": "Anita Sharma",
+    "email": "processor.anita@freshpureprocessing.com",
+    "passwordHash": "scrypt$20250ae38c4db862954ca2b047de30b8$41013c207c35b51dfebde76ca1c787e229db923b42ac8447c77491c967fd1042d08a7a772ee1253526341948fef5f9fbd8d0b59a321e1a3eaccccc3e76d66c4d",
+    "phone": "+91 98230 11982",
+    "role": "processor",
+    "status": "active",
+    "verified": true,
+    "facility": "FreshPure Agro Processing Plant #4",
+    "created_at": "2026-11-18T04:53:25.126Z"
+  },
+  {
+    "user_id": "U0004",
+    "name": "Harpreet Singh",
+    "email": "transporter.singh@coldchainlogistics.com",
+    "passwordHash": "scrypt$0b3e1e15f70d298780384abaf7c08330$e414d8cce8fefdaaa95b15770e35172c683718ca053d521d84980981358f8f4cf0f2a26278638d127d1e1d19908657082be92610d7abbafb0b4a63b7d3ab2ac2",
+    "phone": "+91 98720 33412",
+    "role": "transporter",
+    "status": "active",
+    "verified": true,
+    "facility": "ColdChain Reefer Fleet",
+    "created_at": "2026-11-18T04:53:25.126Z"
+  },
+  {
+    "user_id": "U0005",
+    "name": "Rahul Verma",
+    "email": "retailer.rahul@farmfreshmart.com",
+    "passwordHash": "scrypt$2e65063167cfa7ba5ea5ed286897dc7d$3538bd948907465dc650378a6446ae851be9fe702accf1c8b7a6d5d26680e2407e21ab3db05a017279eadc852eb1794bfef9f25382893bf87dfb9f33dc2839a2",
+    "phone": "+91 98110 55678",
+    "role": "retailer",
+    "status": "active",
+    "verified": true,
+    "facility": "Nature Fresh Mart",
+    "created_at": "2026-11-18T04:53:25.126Z"
+  },
+  {
+    "user_id": "U0006",
+    "name": "Dr. Priya Desai",
+    "email": "inspector.priya@foodsafety.gov.in",
+    "passwordHash": "scrypt$189fe3aceb4bc41999a4b125ce200aed$104f11bb5ac4db683bf76c9f2a2baa291920d90895092fc3a0d6e511b1bbf5d43bc91aa9c01c85c1d3fde9adadca47bc9a25e96208b0b4c4d510a99e412c8ab5",
+    "phone": "+91 98900 77123",
+    "role": "inspector",
+    "status": "active",
+    "verified": true,
+    "facility": "State Food Safety Board",
+    "created_at": "2026-11-18T04:53:25.126Z"
+  }
+]

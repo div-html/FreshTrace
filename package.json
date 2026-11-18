@@ -1,0 +1,23 @@
+{
+  "name": "freshtrace-client",
+  "version": "1.0.0",
+  "description": "FreshTrace - Farm-to-Fork Food Traceability and Freshness Monitoring System (Pista Green & White Theme)",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "serve": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": [
+    "freshtrace",
+    "traceability",
+    "food-safety",
+    "sdg12",
+    "sdg3",
+    "pista-green",
+    "farm-to-fork"
+  ],
+  "author": "FreshTrace Team",
+  "license": "MIT",
+  "type": "commonjs"
+}
