@@ -1,0 +1,1393 @@
+@page
+@model FarmerModel
+@{
+    ViewData["Title"] = "FreshTrace | Farmer Portal";
+    var badgeLive = Model.ActiveShipments.Count > 0;
+    var shipmentBadge = badgeLive ? $"{Model.ActiveShipments.Count} live" : $"{Model.Shipments.Count}";
+}
+
+<div class="dashboard-view-wrapper" id="viewFarmerHome" style="display: flex;">
+  <div class="ambient-grid"></div>
+
+  <!-- Top Navigation -->
+  <nav class="top-nav">
+    <a
+      asp-page="/Farmer"
+      asp-route-section="dashboard"
+      class="nav-brand"
+      style="cursor: pointer; text-decoration: none;"
+      title="Return to Farmer Dashboard"
+    >
+      <span class="nav-brand-title">Fresh<span>Trace</span></span>
+      <span class="nav-role-chip">Farmer Portal</span>
+    </a>
+
+    <div class="nav-controls">
+      <a
+        asp-page="/Farmer"
+        asp-route-section="profile"
+        class="btn-profile-trigger"
+        title="Producer Profile & Farm Registration"
+        style="text-decoration: none;"
+      >
+        <span class="avatar-icon-wrap">
+          <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width: 14px; height: 14px;">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
+        </span>
+        <span>@Model.DisplayName</span>
+      </a>
+
+      <form method="post" asp-page-handler="SignOut" style="margin: 0;">
+        <button type="submit" class="btn-nav-action">Sign out</button>
+      </form>
+    </div>
+  </nav>
+
+  <!-- Workspace Shell: Left Botanical Menu + Main Content Stage -->
+  <div class="farmer-workspace-shell @(Model.IsRailCollapsed ? "rail-collapsed" : "")">
+    <aside class="farmer-left-rail" aria-label="Farmer navigation menu">
+      <div class="farmer-rail-header">
+        <div class="farmer-rail-identity" title="@Model.DisplayName">
+          <div class="farmer-rail-avatar">
+            @FreshTraceDataService.GetInitials(Model.DisplayName)
+            <span class="farmer-rail-avatar-dot" aria-hidden="true"></span>
+          </div>
+          @if (!Model.IsRailCollapsed)
+          {
+            <div class="farmer-rail-user-meta">
+              <span class="farmer-rail-user-name">@Model.DisplayName</span>
+              <span class="farmer-rail-user-sub">Verified Producer</span>
+            </div>
+          }
+        </div>
+
+        <form method="post" asp-page-handler="ToggleRail" style="margin: 0;">
+          <input type="hidden" name="returnSection" value="@Model.Section" />
+          <input type="hidden" name="returnStatus" value="@Model.Status" />
+          <input type="hidden" name="returnShipmentStatus" value="@Model.ShipmentStatus" />
+          <input type="hidden" name="returnQ" value="@Model.Q" />
+          <button
+            type="submit"
+            class="farmer-rail-toggle"
+            aria-label="@(Model.IsRailCollapsed ? "Expand sidebar menu" : "Collapse sidebar menu")"
+            title="@(Model.IsRailCollapsed ? "Expand menu" : "Compact menu")"
+          >
+            <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width: 14px; height: 14px;">
+              @if (Model.IsRailCollapsed)
+              {
+                <polyline points="9 18 15 12 9 6"></polyline>
+              }
+              else
+              {
+                <polyline points="15 18 9 12 15 6"></polyline>
+              }
+            </svg>
+          </button>
+        </form>
+      </div>
+
+      @if (!Model.IsRailCollapsed)
+      {
+        <div class="farmer-rail-caption">Producer Menu</div>
+      }
+
+      <nav class="farmer-rail-nav" aria-label="Farmer sections">
+        <a
+          asp-page="/Farmer"
+          asp-route-section="dashboard"
+          class="farmer-rail-item @(Model.Section == "dashboard" ? "active" : "")"
+          aria-current="@(Model.Section == "dashboard" ? "page" : null)"
+          title="@(Model.IsRailCollapsed ? "Dashboard" : null)"
+          style="text-decoration: none;"
+        >
+          <span class="farmer-rail-item-left">
+            <span class="farmer-rail-icon">
+              <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width: 17px; height: 17px;">
+                <rect x="3" y="3" width="7" height="7" rx="1.5"></rect>
+                <rect x="14" y="3" width="7" height="7" rx="1.5"></rect>
+                <rect x="14" y="14" width="7" height="7" rx="1.5"></rect>
+                <rect x="3" y="14" width="7" height="7" rx="1.5"></rect>
+              </svg>
+            </span>
+            @if (!Model.IsRailCollapsed)
+            {
+              <span class="farmer-rail-label">Dashboard</span>
+            }
+          </span>
+        </a>
+
+        <a
+          asp-page="/Farmer"
+          asp-route-section="batches"
+          class="farmer-rail-item @(Model.Section == "batches" ? "active" : "")"
+          aria-current="@(Model.Section == "batches" ? "page" : null)"
+          title="@(Model.IsRailCollapsed ? "Batch Information" : null)"
+          style="text-decoration: none;"
+        >
+          <span class="farmer-rail-item-left">
+            <span class="farmer-rail-icon">
+              <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width: 17px; height: 17px;">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                <line x1="12" y1="22.08" x2="12" y2="12"></line>
+              </svg>
+            </span>
+            @if (!Model.IsRailCollapsed)
+            {
+              <span class="farmer-rail-label">Batch Information</span>
+            }
+          </span>
+          @if (!Model.IsRailCollapsed)
+          {
+            <span class="farmer-rail-badge">@Model.Batches.Count</span>
+          }
+        </a>
+
+        <a
+          asp-page="/Farmer"
+          asp-route-section="shipments"
+          class="farmer-rail-item @(Model.Section == "shipments" ? "active" : "")"
+          aria-current="@(Model.Section == "shipments" ? "page" : null)"
+          title="@(Model.IsRailCollapsed ? "Shipments" : null)"
+          style="text-decoration: none;"
+        >
+          <span class="farmer-rail-item-left">
+            <span class="farmer-rail-icon">
+              <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width: 17px; height: 17px;">
+                <rect x="1" y="3" width="15" height="13" rx="1.5"></rect>
+                <polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon>
+                <circle cx="5.5" cy="18.5" r="2.5"></circle>
+                <circle cx="18.5" cy="18.5" r="2.5"></circle>
+              </svg>
+            </span>
+            @if (!Model.IsRailCollapsed)
+            {
+              <span class="farmer-rail-label">Shipments</span>
+            }
+          </span>
+          @if (!Model.IsRailCollapsed)
+          {
+            <span class="farmer-rail-badge @(badgeLive ? "live" : "")">
+              @if (badgeLive)
+              {
+                <span class="farmer-rail-live-dot" aria-hidden="true"></span>
+              }
+              @shipmentBadge
+            </span>
+          }
+        </a>
+
+        <a
+          asp-page="/Farmer"
+          asp-route-section="profile"
+          class="farmer-rail-item @(Model.Section == "profile" ? "active" : "")"
+          aria-current="@(Model.Section == "profile" ? "page" : null)"
+          title="@(Model.IsRailCollapsed ? "Profile" : null)"
+          style="text-decoration: none;"
+        >
+          <span class="farmer-rail-item-left">
+            <span class="farmer-rail-icon">
+              <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width: 17px; height: 17px;">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                <circle cx="12" cy="7" r="4"></circle>
+              </svg>
+            </span>
+            @if (!Model.IsRailCollapsed)
+            {
+              <span class="farmer-rail-label">Profile</span>
+            }
+          </span>
+        </a>
+      </nav>
+
+      @if (!Model.IsRailCollapsed)
+      {
+        <div class="farmer-rail-footer">
+          <div class="farmer-rail-pulse-row">
+            <span class="farmer-rail-pulse-label">
+              <span class="farmer-rail-pulse-dot" aria-hidden="true"></span>
+              Cold Storage Live
+            </span>
+            <span>3.6 °C</span>
+          </div>
+          <div class="farmer-rail-pulse-sub">
+            @Model.ReadyBatches.Count @(Model.ReadyBatches.Count == 1 ? "batch" : "batches") ready for pickup • 86% RH optimal
+          </div>
+          <button type="button" class="btn-rail-quick-add" data-open-modal="createBatchModal">
+            <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width: 14px; height: 14px;">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+            <span>Log Harvest Batch</span>
+          </button>
+        </div>
+      }
+      else
+      {
+        <button
+          type="button"
+          class="btn-rail-quick-icon"
+          data-open-modal="createBatchModal"
+          title="Log Harvest Batch"
+          aria-label="Log Harvest Batch"
+        >
+          <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width: 16px; height: 16px;">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
+        </button>
+      }
+    </aside>
+
+    <!-- Right Stage -->
+    <main class="farmer-content-stage">
+      @if (!string.IsNullOrEmpty(Model.ToastMessage))
+      {
+        <div class="farmer-toast" id="farmerToastBanner" role="status">
+          <div class="farmer-toast-left">
+            <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="color: var(--pista-600);">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+              <polyline points="22 4 12 14.01 9 11.01"></polyline>
+            </svg>
+            <span>@Model.ToastMessage</span>
+          </div>
+          <button
+            type="button"
+            class="farmer-toast-close"
+            onclick="document.getElementById('farmerToastBanner').style.display='none'"
+            aria-label="Dismiss notification"
+          >
+            <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width: 16px; height: 16px;">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+      }
+
+      @if (Model.Section == "dashboard")
+      {
+        <!-- ==================== VIEW 1: DASHBOARD ==================== -->
+        <div class="farmer-section-animate">
+          <section class="farmer-hero">
+            <div class="farmer-hero-copy">
+              <div class="farmer-hero-eyebrow">
+                <span class="farmer-hero-dot"></span>
+                <span>Verified Producer • Season 2026</span>
+              </div>
+              <h1 class="farmer-hero-title">Welcome back, @Model.DisplayName</h1>
+              <p class="farmer-hero-subtitle">
+                Track your registered farm parcels, generate QR-traceable harvest batches, and coordinate cold-chain dispatches in real time.
+              </p>
+              <div class="farmer-hero-meta">
+                <span class="farmer-hero-meta-item">
+                  <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width: 15px; height: 15px;">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                    <circle cx="12" cy="10" r="3"></circle>
+                  </svg>
+                  @(Model.Farms.FirstOrDefault()?.District ?? Model.ProfileFarmDistrict)
+                </span>
+                <span class="farmer-hero-meta-item">
+                  <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width: 15px; height: 15px;">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                  </svg>
+                  @Model.Farms.Count Verified @(Model.Farms.Count == 1 ? "Farm" : "Farms") (@Model.TotalAcres.ToString("0.0") Acres)
+                </span>
+                <span class="farmer-hero-meta-item">
+                  <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width: 15px; height: 15px;">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                  </svg>
+                  @Model.ReadyBatches.Count @(Model.ReadyBatches.Count == 1 ? "Batch" : "Batches") Ready for Pickup
+                </span>
+              </div>
+            </div>
+
+            <div class="farmer-hero-actions">
+              <button type="button" class="btn-farmer-primary" data-open-modal="createBatchModal">
+                <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width: 16px; height: 16px;">
+                  <line x1="12" y1="5" x2="12" y2="19"></line>
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+                <span>Log Harvest Batch</span>
+              </button>
+
+              <a asp-page="/Farmer" asp-route-section="shipments" class="btn-farmer-secondary" style="text-decoration: none;">
+                <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width: 16px; height: 16px;">
+                  <rect x="1" y="3" width="15" height="13"></rect>
+                  <polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon>
+                  <circle cx="5.5" cy="18.5" r="2.5"></circle>
+                  <circle cx="18.5" cy="18.5" r="2.5"></circle>
+                </svg>
+                <span>Track Shipments</span>
+              </a>
+            </div>
+          </section>
+
+          <!-- KPI Summary Strip -->
+          <section class="farmer-kpi-grid" aria-label="Farm production summary">
+            <div class="farmer-kpi-card">
+              <div class="farmer-kpi-top">
+                <span class="farmer-kpi-label">Registered Farms</span>
+                <span class="farmer-kpi-icon">
+                  <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 21h18M5 21V7l8-4 6 4v14"></path>
+                  </svg>
+                </span>
+              </div>
+              <div class="farmer-kpi-value">@Model.Farms.Count Farms</div>
+              <div class="farmer-kpi-sub">@Model.TotalAcres.ToString("0.0") total acres active</div>
+            </div>
+
+            <div class="farmer-kpi-card">
+              <div class="farmer-kpi-top">
+                <span class="farmer-kpi-label">Harvest Batches</span>
+                <span class="farmer-kpi-icon">
+                  <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                  </svg>
+                </span>
+              </div>
+              <div class="farmer-kpi-value">@Model.Batches.Count Lots</div>
+              <div class="farmer-kpi-sub">@Model.ReadyBatches.Count ready for cold-chain dispatch</div>
+            </div>
+
+            <div class="farmer-kpi-card">
+              <div class="farmer-kpi-top">
+                <span class="farmer-kpi-label">Ready Stock Volume</span>
+                <span class="farmer-kpi-icon">
+                  <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <rect x="1" y="3" width="15" height="13"></rect>
+                    <polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon>
+                    <circle cx="5.5" cy="18.5" r="2.5"></circle>
+                    <circle cx="18.5" cy="18.5" r="2.5"></circle>
+                  </svg>
+                </span>
+              </div>
+              <div class="farmer-kpi-value">@Model.ReadyStockKg.ToString("N0") kg</div>
+              <div class="farmer-kpi-sub">Pre-cooled &amp; QR-labeled</div>
+            </div>
+
+            <div class="farmer-kpi-card">
+              <div class="farmer-kpi-top">
+                <span class="farmer-kpi-label">Quality Pass Rate</span>
+                <span class="farmer-kpi-icon">
+                  <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4"></path>
+                  </svg>
+                </span>
+              </div>
+              <div class="farmer-kpi-value">@Model.PassRate%</div>
+              <div class="farmer-kpi-sub">Grade A &amp; Organic verified</div>
+            </div>
+          </section>
+
+          <!-- Main Overview Grid -->
+          <div class="farmer-main-grid">
+            <section class="farmer-panel">
+              <div class="farmer-panel-header">
+                <div class="farmer-panel-title-wrap">
+                  <h2 class="farmer-panel-title">
+                    <span>Recent Harvest Batches</span>
+                    <span class="farmer-count-pill">@Model.Batches.Count</span>
+                  </h2>
+                  <p class="farmer-panel-subtitle">
+                    Quick snapshot of your latest harvest lots and dispatch readiness.
+                  </p>
+                </div>
+                <a asp-page="/Farmer" asp-route-section="batches" class="btn-link-subtle" style="text-decoration: none;">
+                  <span>Open Batch Information →</span>
+                </a>
+              </div>
+
+              <div class="farmer-table-wrap">
+                <table class="farmer-batches-table">
+                  <thead>
+                    <tr>
+                      <th>Batch Code</th>
+                      <th>Product &amp; Grade</th>
+                      <th>Quantity</th>
+                      <th>Status</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @foreach (var batch in Model.Batches.Take(4))
+                    {
+                      <tr>
+                        <td><span class="batch-id-pill">@batch.Code</span></td>
+                        <td>
+                          <div class="farmer-cell-primary">@batch.Product</div>
+                          <div class="farmer-cell-secondary">@batch.Farm</div>
+                        </td>
+                        <td style="white-space: nowrap; font-weight: 650;">@batch.QuantityKg.ToString("N0") kg</td>
+                        <td style="white-space: nowrap;">
+                          <span class="@FreshTraceDataService.GetBadgeCssClass(batch.Badge)">@batch.Status</span>
+                        </td>
+                        <td>
+                          <div class="farmer-row-actions">
+                            <a
+                              asp-page="/Farmer"
+                              asp-route-section="dashboard"
+                              asp-route-qr="@batch.Code"
+                              class="btn-row-qr"
+                              title="View QR & Provenance"
+                              style="text-decoration: none;"
+                            >
+                              <span>QR</span>
+                            </a>
+                            @if (batch.Status == "Ready for Dispatch")
+                            {
+                              <form method="post" asp-page-handler="DispatchBatch" style="margin: 0;">
+                                <input type="hidden" name="batchCode" value="@batch.Code" />
+                                <input type="hidden" name="returnSection" value="dashboard" />
+                                <button type="submit" class="btn-row-dispatch">Dispatch</button>
+                              </form>
+                            }
+                          </div>
+                        </td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            </section>
+
+            <aside class="farmer-sidebar-stack">
+              <section class="farmer-panel">
+                <div class="farmer-panel-header">
+                  <div class="farmer-panel-title-wrap">
+                    <h2 class="farmer-panel-title">My Farms</h2>
+                    <p class="farmer-panel-subtitle">Registered agricultural parcels</p>
+                  </div>
+                  <button type="button" class="action-btn-sm" data-open-modal="addFarmModal">
+                    + Add Farm
+                  </button>
+                </div>
+
+                <div class="farmer-farms-list">
+                  @foreach (var farm in Model.Farms)
+                  {
+                    var lotCount = Model.Batches.Count(b => b.Farm == farm.Name);
+                    <div class="farmer-farm-card">
+                      <div class="farmer-farm-head">
+                        <div class="farmer-farm-name">@farm.Name</div>
+                        <span class="farmer-cert-badge">@farm.Certification</span>
+                      </div>
+                      <div class="farmer-farm-meta">
+                        <span>@farm.District</span>
+                        <strong style="color: var(--pista-800);">@farm.AreaAcres Acres</strong>
+                      </div>
+                      <div class="farmer-cell-secondary">
+                        @lotCount tracked harvest @(lotCount == 1 ? "batch" : "batches")
+                      </div>
+                    </div>
+                  }
+                </div>
+
+                <a asp-page="/Farmer" asp-route-section="profile" class="btn-link-subtle" style="text-decoration: none;">
+                  <span>Manage GPS &amp; producer profile →</span>
+                </a>
+              </section>
+
+              <section class="farmer-panel">
+                <div class="farmer-panel-title-wrap">
+                  <h2 class="farmer-panel-title">Cold-Chain &amp; Readiness</h2>
+                  <p class="farmer-panel-subtitle">Live storage and pickup schedule</p>
+                </div>
+
+                <div class="farmer-ops-list">
+                  <div class="farmer-ops-box highlight">
+                    <span class="farmer-ops-kicker">Next Reefer Pickup</span>
+                    <div class="farmer-ops-title">ColdChain Fleet #04 • Today, 4:30 PM</div>
+                    <div class="farmer-ops-desc">
+                      Shimla → Delhi Hub corridor. Target cabin temp: 3.5 °C.
+                    </div>
+                  </div>
+
+                  <div class="farmer-ops-box">
+                    <span class="farmer-ops-kicker">SDG 12.3 Loss Prevention</span>
+                    <div class="farmer-ops-title">98.6% Harvest Preserved</div>
+                    <div class="farmer-progress-track">
+                      <div class="farmer-progress-fill" style="width: 98.6%;"></div>
+                    </div>
+                  </div>
+                </div>
+
+                <a asp-page="/Farmer" asp-route-section="shipments" class="btn-link-subtle" style="text-decoration: none;">
+                  <span>View live shipments &amp; routes →</span>
+                </a>
+              </section>
+            </aside>
+          </div>
+        </div>
+      }
+      else if (Model.Section == "batches")
+      {
+        <!-- ==================== VIEW 2: BATCH INFORMATION ==================== -->
+        <div class="farmer-section-animate">
+          <section class="farmer-section-banner">
+            <div>
+              <span class="role-pill-badge">Harvest Provenance</span>
+              <h1>Batch Information &amp; QR Traceability</h1>
+              <p>Inspect harvest grades, cold storage targets, QR labels, and release ready lots to transit.</p>
+            </div>
+            <button type="button" class="btn-farmer-primary" data-open-modal="createBatchModal">
+              <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width: 16px; height: 16px;">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+              </svg>
+              <span>Log New Batch</span>
+            </button>
+          </section>
+
+          <section class="farmer-telemetry-strip">
+            <div class="farmer-kpi-card">
+              <div class="farmer-kpi-top">
+                <span class="farmer-kpi-label">Total Logged Volume</span>
+              </div>
+              <div class="farmer-kpi-value">@Model.TotalVolumeKg.ToString("N0") kg</div>
+              <div class="farmer-kpi-sub">Across @Model.Batches.Count harvest batches</div>
+            </div>
+            <div class="farmer-kpi-card">
+              <div class="farmer-kpi-top">
+                <span class="farmer-kpi-label">Ready for Dispatch</span>
+              </div>
+              <div class="farmer-kpi-value">@Model.ReadyBatches.Count Lots</div>
+              <div class="farmer-kpi-sub">@Model.ReadyStockKg.ToString("N0") kg pre-cooled</div>
+            </div>
+            <div class="farmer-kpi-card">
+              <div class="farmer-kpi-top">
+                <span class="farmer-kpi-label">Inspection Queue</span>
+              </div>
+              <div class="farmer-kpi-value">@Model.PendingCount @(Model.PendingCount == 1 ? "Lot" : "Lots")</div>
+              <div class="farmer-kpi-sub">Awaiting quality grade sign-off</div>
+            </div>
+          </section>
+
+          <section class="farmer-panel">
+            <div class="farmer-panel-header">
+              <div class="farmer-panel-title-wrap">
+                <h2 class="farmer-panel-title">
+                  <span>All Harvest Batches</span>
+                  <span class="farmer-count-pill">@Model.FilteredBatches.Count</span>
+                </h2>
+                <p class="farmer-panel-subtitle">
+                  Filter by lifecycle status or search by batch code, crop name, or farm parcel.
+                </p>
+              </div>
+            </div>
+
+            <div class="farmer-toolbar">
+              <div class="farmer-filter-pills" role="group" aria-label="Filter batches by status">
+                @foreach (var tab in FarmerModel.StatusTabs)
+                {
+                  var count = tab == "All" ? Model.Batches.Count : Model.Batches.Count(b => b.Status == tab);
+                  <a
+                    asp-page="/Farmer"
+                    asp-route-section="batches"
+                    asp-route-status="@tab"
+                    asp-route-q="@Model.Q"
+                    class="farmer-filter-pill @(Model.Status == tab ? "active" : "")"
+                    style="text-decoration: none;"
+                  >
+                    @tab (@count)
+                  </a>
+                }
+              </div>
+
+              <form method="get" asp-page="/Farmer" class="farmer-search-wrap">
+                <input type="hidden" name="section" value="batches" />
+                <input type="hidden" name="status" value="@Model.Status" />
+                <span class="farmer-search-icon">
+                  <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width: 15px; height: 15px;">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                  </svg>
+                </span>
+                <input
+                  type="text"
+                  name="q"
+                  class="farmer-search-input"
+                  placeholder="Search batch code or crop..."
+                  value="@Model.Q"
+                />
+              </form>
+            </div>
+
+            @if (Model.FilteredBatches.Count > 0)
+            {
+              <div class="farmer-table-wrap">
+                <table class="farmer-batches-table">
+                  <thead>
+                    <tr>
+                      <th>Batch Code</th>
+                      <th>Product &amp; Grade</th>
+                      <th>Origin Farm</th>
+                      <th>Harvested</th>
+                      <th>Quantity</th>
+                      <th>Status</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @foreach (var batch in Model.FilteredBatches)
+                    {
+                      <tr>
+                        <td><span class="batch-id-pill">@batch.Code</span></td>
+                        <td>
+                          <div class="farmer-cell-primary">@batch.Product</div>
+                          <div class="farmer-cell-secondary">@batch.Category • @batch.Grade</div>
+                        </td>
+                        <td>
+                          <div class="farmer-cell-primary">@batch.Farm</div>
+                          <div class="farmer-cell-secondary">Storage: @batch.TempC</div>
+                        </td>
+                        <td style="white-space: nowrap;">@FreshTraceDataService.FormatDisplayDate(batch.HarvestDate)</td>
+                        <td style="white-space: nowrap; font-weight: 650;">@batch.QuantityKg.ToString("N0") kg</td>
+                        <td style="white-space: nowrap;">
+                          <span class="@FreshTraceDataService.GetBadgeCssClass(batch.Badge)">@batch.Status</span>
+                        </td>
+                        <td>
+                          <div class="farmer-row-actions">
+                            <a
+                              asp-page="/Farmer"
+                              asp-route-section="batches"
+                              asp-route-status="@Model.Status"
+                              asp-route-q="@Model.Q"
+                              asp-route-qr="@batch.Code"
+                              class="btn-row-qr"
+                              title="View QR & Provenance"
+                              style="text-decoration: none;"
+                            >
+                              <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width: 13px; height: 13px;">
+                                <rect x="3" y="3" width="7" height="7"></rect>
+                                <rect x="14" y="3" width="7" height="7"></rect>
+                                <rect x="3" y="14" width="7" height="7"></rect>
+                                <rect x="14" y="14" width="3" height="3"></rect>
+                                <rect x="19" y="19" width="2" height="2"></rect>
+                              </svg>
+                              <span>QR &amp; Info</span>
+                            </a>
+
+                            @if (batch.Status == "Ready for Dispatch")
+                            {
+                              <form method="post" asp-page-handler="DispatchBatch" style="margin: 0;">
+                                <input type="hidden" name="batchCode" value="@batch.Code" />
+                                <input type="hidden" name="returnSection" value="batches" />
+                                <input type="hidden" name="returnStatus" value="@Model.Status" />
+                                <input type="hidden" name="returnQ" value="@Model.Q" />
+                                <button type="submit" class="btn-row-dispatch">Dispatch</button>
+                              </form>
+                            }
+                          </div>
+                        </td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            }
+            else
+            {
+              <div class="farmer-empty-state">
+                <p>No harvest batches match your current filter.</p>
+                <a asp-page="/Farmer" asp-route-section="batches" class="btn-farmer-secondary" style="text-decoration: none;">
+                  Reset filters
+                </a>
+              </div>
+            }
+          </section>
+        </div>
+      }
+      else if (Model.Section == "shipments")
+      {
+        <!-- ==================== VIEW 3: SHIPMENTS ==================== -->
+        <div class="farmer-section-animate">
+          <section class="farmer-section-banner">
+            <div>
+              <span class="role-pill-badge">Cold-Chain Logistics</span>
+              <h1>Shipments &amp; Dispatch Tracking</h1>
+              <p>Monitor live refrigerated transit, reefer temperatures, and upcoming farm pickups.</p>
+            </div>
+            <a asp-page="/Farmer" asp-route-section="batches" class="btn-farmer-secondary" style="text-decoration: none;">
+              <span>Browse Ready Batches (@Model.ReadyBatches.Count)</span>
+            </a>
+          </section>
+
+          <section class="farmer-telemetry-strip">
+            <div class="farmer-ops-box highlight" style="margin: 0;">
+              <span class="farmer-ops-kicker">Next Reefer Pickup</span>
+              <div class="farmer-ops-title">ColdChain Fleet #04 • Today, 4:30 PM</div>
+              <div class="farmer-ops-desc">
+                Shimla → Delhi Hub corridor. Target cabin temperature: 3.5 °C.
+              </div>
+            </div>
+            <div class="farmer-ops-box" style="margin: 0; background: var(--surface-white);">
+              <span class="farmer-ops-kicker">Active In-Transit Load</span>
+              <div class="farmer-ops-title">
+                @Model.ActiveShipments.Count @(Model.ActiveShipments.Count == 1 ? "Shipment" : "Shipments") (@Model.InTransitKg.ToString("N0") kg)
+              </div>
+              <div class="farmer-ops-desc">
+                Real-time GPS &amp; thermal sensor telemetry online.
+              </div>
+            </div>
+            <div class="farmer-ops-box" style="margin: 0; background: var(--surface-white);">
+              <span class="farmer-ops-kicker">On-Farm Cold Storage</span>
+              <div class="farmer-ops-title">3.6 °C • 86% Humidity (Optimal)</div>
+              <div class="farmer-ops-desc">
+                Zero thermal excursions across active holding rooms.
+              </div>
+            </div>
+          </section>
+
+          <section class="farmer-panel">
+            <div class="farmer-panel-header">
+              <div class="farmer-panel-title-wrap">
+                <h2 class="farmer-panel-title">
+                  <span>Cold-Chain Shipments</span>
+                  <span class="farmer-count-pill">@Model.FilteredShipments.Count</span>
+                </h2>
+                <p class="farmer-panel-subtitle">
+                  Live transit cards synced with your dispatched harvest batches.
+                </p>
+              </div>
+
+              <div class="farmer-filter-pills" role="group" aria-label="Filter shipments">
+                @foreach (var tab in FarmerModel.ShipmentTabs)
+                {
+                  var count = tab == "All" ? Model.Shipments.Count : Model.Shipments.Count(s => s.Status == tab);
+                  <a
+                    asp-page="/Farmer"
+                    asp-route-section="shipments"
+                    asp-route-shipmentStatus="@tab"
+                    class="farmer-filter-pill @(Model.ShipmentStatus == tab ? "active" : "")"
+                    style="text-decoration: none;"
+                  >
+                    @tab (@count)
+                  </a>
+                }
+              </div>
+            </div>
+
+            <div class="farmer-shipments-grid">
+              @foreach (var shp in Model.FilteredShipments)
+              {
+                var linkedBatch = Model.Batches.FirstOrDefault(b => b.Code == shp.BatchCode);
+                var stageIndex = shp.Status == "Delivered" ? 3 : 2;
+                var steps = new[] { "Packed", "Reefer Loaded", "Cold Transit", "Hub Delivered" };
+                <article class="farmer-shipment-card">
+                  <div class="farmer-shipment-top">
+                    <div>
+                      <div style="display: flex; align-items: center; gap: 0.45rem; flex-wrap: wrap;">
+                        <span class="batch-id-pill">@shp.Id</span>
+                        <span class="farmer-cell-secondary" style="margin-top: 0;">@shp.BatchCode</span>
+                      </div>
+                      <h3 style="font-size: 1.05rem; font-weight: 750; color: var(--text-title); margin-top: 0.45rem;">
+                        @shp.Product
+                      </h3>
+                    </div>
+                    <span class="@FreshTraceDataService.GetBadgeCssClass(shp.Badge)">@shp.Status</span>
+                  </div>
+
+                  <div class="farmer-shipment-route">
+                    <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width: 15px; height: 15px; color: var(--pista-600); flex-shrink: 0;">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                      <circle cx="12" cy="10" r="3"></circle>
+                    </svg>
+                    <span>@shp.Origin → @shp.Destination</span>
+                  </div>
+
+                  <div class="farmer-shipment-metrics">
+                    <div class="farmer-shipment-metric">
+                      <div class="farmer-shipment-metric-label">Volume</div>
+                      <div class="farmer-shipment-metric-val">@shp.QuantityKg.ToString("N0") kg</div>
+                    </div>
+                    <div class="farmer-shipment-metric">
+                      <div class="farmer-shipment-metric-label">Reefer Temp</div>
+                      <div class="farmer-shipment-metric-val">@shp.TempC</div>
+                    </div>
+                    <div class="farmer-shipment-metric">
+                      <div class="farmer-shipment-metric-label">ETA / Arrival</div>
+                      <div class="farmer-shipment-metric-val">@shp.Eta</div>
+                    </div>
+                  </div>
+
+                  <div class="farmer-shipment-steps">
+                    @for (var i = 0; i < steps.Length; i++)
+                    {
+                      <div class="farmer-shipment-step @(i <= stageIndex ? "done" : "")">
+                        @(i <= stageIndex ? "✓ " : "")@steps[i]
+                      </div>
+                    }
+                  </div>
+
+                  <div class="farmer-shipment-footer">
+                    <span class="farmer-cell-secondary" style="margin-top: 0;">
+                      @shp.Carrier • @shp.Vehicle
+                    </span>
+                    <div class="farmer-row-actions">
+                      @if (linkedBatch is not null)
+                      {
+                        <a
+                          asp-page="/Farmer"
+                          asp-route-section="shipments"
+                          asp-route-shipmentStatus="@Model.ShipmentStatus"
+                          asp-route-qr="@linkedBatch.Code"
+                          class="btn-row-qr"
+                          style="text-decoration: none;"
+                        >
+                          Batch QR
+                        </a>
+                      }
+                      @if (shp.Status == "In Transit")
+                      {
+                        <form method="post" asp-page-handler="DeliverShipment" style="margin: 0;">
+                          <input type="hidden" name="shipmentId" value="@shp.Id" />
+                          <input type="hidden" name="batchCode" value="@shp.BatchCode" />
+                          <input type="hidden" name="returnShipmentStatus" value="@Model.ShipmentStatus" />
+                          <button type="submit" class="btn-row-dispatch">Confirm Delivery</button>
+                        </form>
+                      }
+                    </div>
+                  </div>
+                </article>
+              }
+            </div>
+          </section>
+
+          @if (Model.ReadyBatches.Count > 0)
+          {
+            <section class="farmer-panel">
+              <div class="farmer-panel-header">
+                <div class="farmer-panel-title-wrap">
+                  <h2 class="farmer-panel-title">
+                    <span>Ready for Reefer Pickup</span>
+                    <span class="farmer-count-pill">@Model.ReadyBatches.Count</span>
+                  </h2>
+                  <p class="farmer-panel-subtitle">
+                    Pre-cooled harvest batches waiting to be released to ColdChain Fleet #04.
+                  </p>
+                </div>
+              </div>
+
+              <div class="farmer-table-wrap">
+                <table class="farmer-batches-table">
+                  <thead>
+                    <tr>
+                      <th>Batch Code</th>
+                      <th>Product</th>
+                      <th>Origin Farm</th>
+                      <th>Volume</th>
+                      <th>Target Temp</th>
+                      <th>Dispatch</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @foreach (var batch in Model.ReadyBatches)
+                    {
+                      <tr>
+                        <td><span class="batch-id-pill">@batch.Code</span></td>
+                        <td><strong>@batch.Product</strong></td>
+                        <td>@batch.Farm</td>
+                        <td style="font-weight: 650;">@batch.QuantityKg.ToString("N0") kg</td>
+                        <td>@batch.TempC</td>
+                        <td>
+                          <form method="post" asp-page-handler="DispatchBatch" style="margin: 0;">
+                            <input type="hidden" name="batchCode" value="@batch.Code" />
+                            <input type="hidden" name="returnSection" value="shipments" />
+                            <input type="hidden" name="returnShipmentStatus" value="@Model.ShipmentStatus" />
+                            <button type="submit" class="btn-row-dispatch">Dispatch Now</button>
+                          </form>
+                        </td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            </section>
+          }
+        </div>
+      }
+      else
+      {
+        <!-- ==================== VIEW 4: PROFILE ==================== -->
+        <div class="farmer-section-animate">
+          <section class="farmer-section-banner">
+            <div>
+              <span class="role-pill-badge">Verified Producer</span>
+              <h1>Producer Profile &amp; Farm Registration</h1>
+              <p>Manage your identity credentials, GPS coordinates, and registered agricultural parcels.</p>
+            </div>
+            <button type="button" class="btn-farmer-secondary" data-open-modal="addFarmModal">
+              <span>+ Add New Farm Parcel</span>
+            </button>
+          </section>
+
+          <form method="post" asp-page-handler="SaveProfile" class="farmer-profile-grid">
+            <!-- Producer Identity Card -->
+            <section class="farmer-profile-card">
+              <div class="farmer-profile-identity">
+                <div class="user-brand-logo" style="width: 54px; height: 54px;">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 26px; height: 26px;">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4" />
+                  </svg>
+                </div>
+                <div>
+                  <h2 style="font-family: var(--font-brand); font-size: 1.25rem; font-weight: 800; color: var(--text-title);">
+                    @Model.DisplayName
+                  </h2>
+                  <p style="font-size: 0.84rem; color: var(--text-muted);">@Model.UserEmail</p>
+                  <span class="verified-producer-pill" style="margin-top: 0.4rem; font-size: 0.73rem; padding: 0.2rem 0.65rem;">
+                    ✓ Verified Producer
+                  </span>
+                </div>
+              </div>
+
+              <div class="user-fields-grid">
+                <div class="user-field-group">
+                  <label class="user-field-label" for="farmerProfileName">Full Name</label>
+                  <input
+                    id="farmerProfileName"
+                    name="ProfileName"
+                    type="text"
+                    class="user-field-input"
+                    value="@Model.ProfileName"
+                    required
+                  />
+                </div>
+
+                <div class="user-field-group">
+                  <label class="user-field-label" for="farmerProfileEmail">Email Address</label>
+                  <input
+                    id="farmerProfileEmail"
+                    type="email"
+                    class="user-field-input user-field-readonly"
+                    readonly
+                    value="@Model.UserEmail"
+                  />
+                </div>
+
+                <div class="user-field-group">
+                  <label class="user-field-label" for="farmerProfilePhone">Phone Number</label>
+                  <input
+                    id="farmerProfilePhone"
+                    name="ProfilePhone"
+                    type="tel"
+                    class="user-field-input"
+                    value="@Model.ProfilePhone"
+                  />
+                </div>
+              </div>
+
+              <div style="display: flex; justify-content: flex-end; padding-top: 0.25rem;">
+                <button type="submit" class="btn-farmer-primary">Save Producer Details</button>
+              </div>
+            </section>
+
+            <!-- Primary Farm & GPS Registration Card -->
+            <section class="farmer-profile-card">
+              <div class="farmer-panel-title-wrap">
+                <h2 class="farmer-panel-title">Primary Farm &amp; GPS Location</h2>
+                <p class="farmer-panel-subtitle">Used for origin verification on consumer QR labels</p>
+              </div>
+
+              <div class="current-location-box" style="padding: 1rem 1.15rem; gap: 0.75rem;">
+                <div class="current-loc-header" style="gap: 0.65rem;">
+                  <div class="current-loc-title">
+                    <h4>Auto-Detect Location</h4>
+                    <p>Set your farm district and coordinates using GPS.</p>
+                  </div>
+                  <button
+                    type="button"
+                    class="btn-use-location"
+                    data-gps-detect
+                    data-coords-target="farmerFarmCoords"
+                    data-district-target="farmerFarmDistrict"
+                    data-badge-target="farmerGeoBadge"
+                    data-badge-text="farmerGeoText"
+                  >
+                    <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width: 16px; height: 16px;">
+                      <circle cx="12" cy="12" r="10"></circle>
+                      <line x1="22" y1="12" x2="18" y2="12"></line>
+                      <line x1="6" y1="12" x2="2" y2="12"></line>
+                      <line x1="12" y1="6" x2="12" y2="2"></line>
+                      <line x1="12" y1="22" x2="12" y2="18"></line>
+                    </svg>
+                    <span>Use Current Location</span>
+                  </button>
+                </div>
+                <div id="farmerGeoBadge" class="geo-success-badge" style="display: none;">
+                  <span id="farmerGeoText"></span>
+                </div>
+              </div>
+
+              <div class="farm-fields-grid" style="gap: 1rem;">
+                <div class="farm-field-item">
+                  <label class="farm-field-label" for="farmerFarmName">Primary Farm Name</label>
+                  <input
+                    id="farmerFarmName"
+                    name="ProfileFarmName"
+                    type="text"
+                    class="user-field-input"
+                    value="@Model.ProfileFarmName"
+                  />
+                </div>
+                <div class="farm-field-item">
+                  <label class="farm-field-label" for="farmerFarmArea">Land Area</label>
+                  <input
+                    id="farmerFarmArea"
+                    name="ProfileFarmArea"
+                    type="text"
+                    class="user-field-input"
+                    value="@Model.ProfileFarmArea"
+                  />
+                </div>
+                <div class="farm-field-item">
+                  <label class="farm-field-label" for="farmerFarmDistrict">District / Location</label>
+                  <input
+                    id="farmerFarmDistrict"
+                    name="ProfileFarmDistrict"
+                    type="text"
+                    class="user-field-input"
+                    value="@Model.ProfileFarmDistrict"
+                  />
+                </div>
+                <div class="farm-field-item">
+                  <label class="farm-field-label" for="farmerFarmCoords">Coordinates</label>
+                  <input
+                    id="farmerFarmCoords"
+                    name="ProfileFarmCoords"
+                    type="text"
+                    class="user-field-input"
+                    value="@Model.ProfileFarmCoords"
+                  />
+                </div>
+              </div>
+
+              <div style="display: flex; justify-content: flex-end; padding-top: 0.25rem;">
+                <button type="submit" class="btn-farmer-primary">Save Farm Details</button>
+              </div>
+            </section>
+          </form>
+
+          <!-- Registered Parcels List -->
+          <section class="farmer-panel">
+            <div class="farmer-panel-header">
+              <div class="farmer-panel-title-wrap">
+                <h2 class="farmer-panel-title">
+                  <span>Registered Farm Parcels</span>
+                  <span class="farmer-count-pill">@Model.Farms.Count</span>
+                </h2>
+                <p class="farmer-panel-subtitle">All orchards and plots linked to your producer account</p>
+              </div>
+              <button type="button" class="action-btn-sm" data-open-modal="addFarmModal">
+                + Add Farm
+              </button>
+            </div>
+
+            <div class="farmer-shipments-grid">
+              @foreach (var farm in Model.Farms)
+              {
+                var lotCount = Model.Batches.Count(b => b.Farm == farm.Name);
+                <div class="farmer-farm-card">
+                  <div class="farmer-farm-head">
+                    <div class="farmer-farm-name">@farm.Name</div>
+                    <span class="farmer-cert-badge">@farm.Certification</span>
+                  </div>
+                  <div class="farmer-farm-meta">
+                    <span>@farm.District</span>
+                    <strong style="color: var(--pista-800);">@farm.AreaAcres Acres</strong>
+                  </div>
+                  <div class="farmer-crop-tags">
+                    @foreach (var crop in farm.Crops)
+                    {
+                      <span class="farmer-crop-tag">@crop</span>
+                    }
+                  </div>
+                  <div class="farmer-cell-secondary">
+                    @lotCount tracked harvest @(lotCount == 1 ? "batch" : "batches")
+                  </div>
+                </div>
+              }
+            </div>
+          </section>
+        </div>
+      }
+    </main>
+  </div>
+
+  <!-- ==================== MODAL: LOG HARVEST BATCH ==================== -->
+  <div id="createBatchModal" class="farmer-modal-backdrop" data-modal-backdrop style="display: none;">
+    <div class="farmer-modal" role="dialog" aria-modal="true" aria-labelledby="modalCreateBatchTitle">
+      <div class="farmer-modal-header">
+        <div>
+          <h2 id="modalCreateBatchTitle">Log New Harvest Batch</h2>
+          <p>Generate a unique FreshTrace Batch ID and QR provenance token.</p>
+        </div>
+        <button type="button" class="farmer-modal-close" data-close-modal="createBatchModal" aria-label="Close modal">
+          ✕
+        </button>
+      </div>
+
+      <form method="post" asp-page-handler="CreateBatch" style="display: flex; flex-direction: column; gap: 1.1rem;">
+        <input type="hidden" name="returnSection" value="@Model.Section" />
+        <div class="farmer-modal-grid">
+          <div class="farmer-modal-field full">
+            <label class="form-label" for="batchProduct">Crop / Product Name</label>
+            <input
+              id="batchProduct"
+              name="NewProduct"
+              type="text"
+              class="form-input"
+              placeholder="e.g. Organic Honeycrisp Apples"
+              required
+            />
+          </div>
+
+          <div class="farmer-modal-field">
+            <label class="form-label" for="batchCategory">Category</label>
+            <select id="batchCategory" name="NewCategory" class="form-input">
+              <option value="Fresh Fruits">Fresh Fruits</option>
+              <option value="Vegetables">Vegetables</option>
+              <option value="Leafy Greens">Leafy Greens</option>
+              <option value="Berries">Berries</option>
+              <option value="Grains & Pulses">Grains &amp; Pulses</option>
+            </select>
+          </div>
+
+          <div class="farmer-modal-field">
+            <label class="form-label" for="batchFarm">Origin Farm</label>
+            <select id="batchFarm" name="NewFarm" class="form-input">
+              @foreach (var f in Model.Farms)
+              {
+                <option value="@f.Name">@f.Name</option>
+              }
+            </select>
+          </div>
+
+          <div class="farmer-modal-field">
+            <label class="form-label" for="batchDate">Harvest Date</label>
+            <input id="batchDate" name="NewHarvestDate" type="date" class="form-input" value="@Model.NewHarvestDate" required />
+          </div>
+
+          <div class="farmer-modal-field">
+            <label class="form-label" for="batchQty">Quantity (kg)</label>
+            <input id="batchQty" name="NewQuantity" type="number" min="1" class="form-input" value="@Model.NewQuantity" required />
+          </div>
+
+          <div class="farmer-modal-field">
+            <label class="form-label" for="batchGrade">Quality Grade</label>
+            <select id="batchGrade" name="NewGrade" class="form-input">
+              <option value="Grade A (Export)">Grade A (Export)</option>
+              <option value="Grade A+ (Organic)">Grade A+ (Organic)</option>
+              <option value="Grade B (Standard)">Grade B (Standard)</option>
+            </select>
+          </div>
+
+          <div class="farmer-modal-field">
+            <label class="form-label" for="batchTemp">Target Storage (°C)</label>
+            <input id="batchTemp" name="NewTemp" type="number" step="0.1" class="form-input" value="@Model.NewTemp" required />
+          </div>
+
+          <div class="farmer-modal-field full">
+            <label class="form-label" for="batchStatus">Initial Readiness Status</label>
+            <select id="batchStatus" name="NewStatus" class="form-input">
+              <option value="Ready for Dispatch">Ready for Dispatch</option>
+              <option value="Inspection Pending">Inspection Pending</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="farmer-modal-actions">
+          <button type="button" class="btn-farmer-secondary" data-close-modal="createBatchModal">Cancel</button>
+          <button type="submit" class="btn-farmer-primary">Create Batch &amp; QR</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL: ADD FARM PARCEL ==================== -->
+  <div id="addFarmModal" class="farmer-modal-backdrop" data-modal-backdrop style="display: none;">
+    <div class="farmer-modal" role="dialog" aria-modal="true" aria-labelledby="modalAddFarmTitle">
+      <div class="farmer-modal-header">
+        <div>
+          <h2 id="modalAddFarmTitle">Register New Farm Parcel</h2>
+          <p>Add an orchard or agricultural plot to link future harvest batches.</p>
+        </div>
+        <button type="button" class="farmer-modal-close" data-close-modal="addFarmModal" aria-label="Close modal">
+          ✕
+        </button>
+      </div>
+
+      <form method="post" asp-page-handler="AddFarm" style="display: flex; flex-direction: column; gap: 1.1rem;">
+        <input type="hidden" name="returnSection" value="@Model.Section" />
+        <div class="farmer-modal-grid">
+          <div class="farmer-modal-field full">
+            <label class="form-label" for="farmNameInput">Farm Name</label>
+            <input
+              id="farmNameInput"
+              name="AddFarmName"
+              type="text"
+              class="form-input"
+              placeholder="e.g. Highland Meadow Orchard"
+              required
+            />
+          </div>
+
+          <div class="farmer-modal-field full">
+            <label class="form-label" for="farmDistrictInput">District / Location</label>
+            <input
+              id="farmDistrictInput"
+              name="AddFarmDistrict"
+              type="text"
+              class="form-input"
+              placeholder="e.g. Kullu Valley, Himachal Pradesh"
+              required
+            />
+          </div>
+
+          <div class="farmer-modal-field">
+            <label class="form-label" for="farmAreaInput">Cultivated Area (Acres)</label>
+            <input
+              id="farmAreaInput"
+              name="AddFarmArea"
+              type="number"
+              step="0.5"
+              min="0.5"
+              class="form-input"
+              placeholder="e.g. 10.5"
+              required
+            />
+          </div>
+
+          <div class="farmer-modal-field">
+            <label class="form-label" for="farmCertInput">Certification</label>
+            <select id="farmCertInput" name="AddFarmCert" class="form-input">
+              <option value="Certified Organic">Certified Organic</option>
+              <option value="GAP Certified">GAP Certified</option>
+              <option value="Pesticide-Free">Pesticide-Free</option>
+            </select>
+          </div>
+
+          <div class="farmer-modal-field full">
+            <label class="form-label" for="farmCropsInput">Primary Crops (comma-separated)</label>
+            <input
+              id="farmCropsInput"
+              name="AddFarmCrops"
+              type="text"
+              class="form-input"
+              placeholder="e.g. Kinnaur Apples, Cherries, Plums"
+            />
+          </div>
+        </div>
+
+        <div class="farmer-modal-actions">
+          <button type="button" class="btn-farmer-secondary" data-close-modal="addFarmModal">Cancel</button>
+          <button type="submit" class="btn-farmer-primary">Save Farm Parcel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL: BATCH QR & PROVENANCE ==================== -->
+  @if (Model.QrBatch is not null)
+  {
+    var qrCloseUrl = Url.Page("/Farmer", new
+    {
+      section = Model.Section,
+      status = Model.Status == "All" ? null : Model.Status,
+      shipmentStatus = Model.ShipmentStatus == "All" ? null : Model.ShipmentStatus,
+      q = string.IsNullOrWhiteSpace(Model.Q) ? null : Model.Q
+    });
+    var activeStageIdx = FarmerModel.GetJourneyStageIndex(Model.QrBatch.Status);
+    var lifecycleStages = new[] { "Harvested", "Quality Graded", "Dispatched", "Delivered" };
+
+    <div
+      id="qrProvenanceModal"
+      class="farmer-modal-backdrop"
+      data-modal-backdrop
+      data-server-open="true"
+      data-close-url="@qrCloseUrl"
+    >
+      <div class="farmer-modal" role="dialog" aria-modal="true" aria-labelledby="modalQrTitle">
+        <div class="farmer-modal-header">
+          <div>
+            <h2 id="modalQrTitle">Batch Provenance &amp; QR Label</h2>
+            <p>Scannable traceability record for downstream distributors and consumers.</p>
+          </div>
+          <a href="@qrCloseUrl" class="farmer-modal-close" aria-label="Close modal" style="text-decoration: none;">
+            ✕
+          </a>
+        </div>
+
+        <div class="farmer-qr-card">
+          <div class="farmer-qr-box">
+            @Html.Raw(QrSvgRenderer.RenderSvg(Model.QrBatch.Code))
+          </div>
+          <div class="farmer-qr-meta">
+            <span class="batch-id-pill" style="align-self: flex-start;">@Model.QrBatch.Code</span>
+            <div style="font-weight: 750; font-size: 1.05rem; color: var(--text-title); margin-top: 0.2rem;">
+              @Model.QrBatch.Product
+            </div>
+            <div class="farmer-cell-secondary">Token: @Model.QrBatch.QrToken</div>
+            <div style="margin-top: 0.35rem;">
+              <span class="@FreshTraceDataService.GetBadgeCssClass(Model.QrBatch.Badge)">
+                @Model.QrBatch.Status
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div class="farmer-qr-specs">
+          <div class="farmer-qr-spec">
+            <div class="farmer-qr-spec-label">Origin Farm</div>
+            <div class="farmer-qr-spec-val">@Model.QrBatch.Farm</div>
+          </div>
+          <div class="farmer-qr-spec">
+            <div class="farmer-qr-spec-label">Producer</div>
+            <div class="farmer-qr-spec-val">@Model.DisplayName</div>
+          </div>
+          <div class="farmer-qr-spec">
+            <div class="farmer-qr-spec-label">Harvested / Volume</div>
+            <div class="farmer-qr-spec-val">
+              @FreshTraceDataService.FormatDisplayDate(Model.QrBatch.HarvestDate) • @Model.QrBatch.QuantityKg.ToString("N0") kg
+            </div>
+          </div>
+          <div class="farmer-qr-spec">
+            <div class="farmer-qr-spec-label">Grade &amp; Cold Storage</div>
+            <div class="farmer-qr-spec-val">
+              @Model.QrBatch.Grade • @Model.QrBatch.TempC
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div class="farmer-qr-spec-label" style="margin-bottom: 0.45rem;">
+            Farm-to-Fork Lifecycle Stage
+          </div>
+          <div class="farmer-journey-steps">
+            @for (var i = 0; i < lifecycleStages.Length; i++)
+            {
+              <div class="farmer-journey-step @(i <= activeStageIdx ? "done" : "")">
+                @(i <= activeStageIdx ? "✓ " : "")@lifecycleStages[i]
+              </div>
+            }
+          </div>
+        </div>
+
+        <div class="farmer-modal-actions">
+          <button type="button" class="btn-farmer-secondary" data-copy-text="@Model.QrBatch.Code">
+            <span data-copy-label>Copy Batch ID</span>
+          </button>
+          <a href="@qrCloseUrl" class="btn-farmer-primary" style="text-decoration: none;">
+            Done
+          </a>
+        </div>
+      </div>
+    </div>
+  }
+</div>

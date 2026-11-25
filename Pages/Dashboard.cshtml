@@ -1,0 +1,137 @@
+@page
+@model DashboardModel
+@{
+    ViewData["Title"] = $"FreshTrace | {Model.RoleConfig.Badge}";
+}
+
+<div class="dashboard-view-wrapper" id="viewDashboard" style="display: flex;">
+  <div class="ambient-grid"></div>
+
+  <nav class="top-nav">
+    <a asp-page="/Dashboard" class="nav-brand" style="cursor: pointer; text-decoration: none;">
+      <span class="nav-brand-title">Fresh<span>Trace</span></span>
+    </a>
+
+    <div class="nav-controls">
+      <a
+        asp-page="/Profile"
+        class="btn-profile-trigger"
+        title="Account Profile"
+        style="text-decoration: none;"
+      >
+        <span class="avatar-icon-wrap">
+          <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width: 14px; height: 14px;">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
+        </span>
+        <span>@Model.UserName</span>
+      </a>
+
+      <form method="post" asp-page-handler="SignOut" style="margin: 0;">
+        <button type="submit" class="btn-nav-action">Sign out</button>
+      </form>
+    </div>
+  </nav>
+
+  <main class="dash-content">
+    @if (!string.IsNullOrEmpty(Model.SuccessNotice))
+    {
+      <div class="auth-alert info" style="margin-bottom: 1.5rem; background: var(--pista-100); color: var(--pista-900); border: 1px solid var(--pista-300);">
+        <span>✓ @Model.SuccessNotice</span>
+      </div>
+    }
+
+    @if (!string.IsNullOrEmpty(Model.CtaNotice))
+    {
+      <div class="farmer-toast" role="status" style="margin-bottom: 1.5rem;">
+        <div class="farmer-toast-left">
+          <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="color: var(--pista-600);">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+            <polyline points="22 4 12 14.01 9 11.01"></polyline>
+          </svg>
+          <span>@Model.CtaNotice</span>
+        </div>
+      </div>
+    }
+
+    <div class="dash-greeting">
+      <div>
+        <span class="role-pill-badge">@Model.RoleConfig.Badge</span>
+        <h1>Welcome, @Model.UserName</h1>
+        <p>Role: <strong style="text-transform: capitalize;">@Model.ActiveRole</strong> • @Model.RoleConfig.Subtitle</p>
+      </div>
+      <form method="post" asp-page-handler="TriggerCta" style="margin: 0;">
+        <button type="submit" class="btn-create-batch">
+          <span>@Model.RoleConfig.CtaLabel</span>
+        </button>
+      </form>
+    </div>
+
+    <div class="stats-grid">
+      @foreach (var stat in Model.RoleConfig.Stats)
+      {
+        <div class="stat-card">
+          <div class="stat-title">@stat.Title</div>
+          <div class="stat-val">@stat.Value</div>
+          <div class="stat-sub">@stat.Sub</div>
+        </div>
+      }
+    </div>
+
+    @if (Model.ActiveRole == "consumer")
+    {
+      <div class="consumer-verify-card">
+        <div class="table-header-row" style="margin-bottom: 0;">
+          <h2 class="table-title">Instant Batch Origin Lookup</h2>
+        </div>
+        <form class="consumer-verify-row" method="post" asp-page-handler="VerifyBatch">
+          <input
+            type="text"
+            name="ConsumerBatchQuery"
+            class="consumer-verify-input"
+            placeholder="Enter Batch Code (e.g. BATCH-2026-APL-098)"
+            value="@Model.ConsumerBatchQuery"
+          />
+          <button type="submit" class="btn-create-batch">
+            <span>Verify Batch</span>
+          </button>
+        </form>
+        @if (!string.IsNullOrEmpty(Model.ConsumerTraceResult))
+        {
+          <div class="consumer-trace-result">@Model.ConsumerTraceResult</div>
+        }
+      </div>
+    }
+
+    <div class="table-card">
+      <div class="table-header-row">
+        <h2 class="table-title">@Model.RoleConfig.TableTitle</h2>
+      </div>
+
+      <table class="batches-table">
+        <thead>
+          <tr>
+            @foreach (var col in Model.RoleConfig.Columns)
+            {
+              <th>@col</th>
+            }
+          </tr>
+        </thead>
+        <tbody>
+          @foreach (var row in Model.RoleConfig.Rows)
+          {
+            <tr>
+              <td><span class="batch-id-pill">@row.Code</span></td>
+              <td><strong>@row.Col2</strong></td>
+              <td>@row.Col3</td>
+              <td>@row.Col4</td>
+              <td>@row.Col5</td>
+              <td><span class="@FreshTraceDataService.GetBadgeCssClass(row.Badge)">@row.Status</span></td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </main>
+</div>

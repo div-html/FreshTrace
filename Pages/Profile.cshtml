@@ -1,0 +1,202 @@
+@page
+@model ProfileModel
+@{
+    ViewData["Title"] = "FreshTrace | Producer Profile & Farm Registration";
+}
+
+<div class="profile-view-wrapper" id="viewProfile" style="display: flex;">
+  <nav class="top-nav">
+    <a href="@Model.BackUrl" class="nav-brand" style="cursor: pointer; text-decoration: none;">
+      <span class="nav-brand-title">Fresh<span>Trace</span></span>
+    </a>
+
+    <div class="nav-controls">
+      <a href="@Model.BackUrl" class="btn-nav-back" style="text-decoration: none;">
+        <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width: 15px; height: 15px;">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M19 12H5M12 19l-7-7 7-7" />
+        </svg>
+        <span>Back to Dashboard</span>
+      </a>
+
+      <form method="post" asp-page-handler="SignOut" style="margin: 0;">
+        <button type="submit" class="btn-nav-action">Sign out</button>
+      </form>
+    </div>
+  </nav>
+
+  <form method="post" asp-page-handler="Save" class="profile-container">
+    <div class="profile-page-header">
+      <h1>Producer Profile &amp; Farm Registration</h1>
+      <p>Manage your account credentials and farm details.</p>
+    </div>
+
+    @if (!string.IsNullOrEmpty(Model.SaveSuccessMessage))
+    {
+      <div class="farmer-toast" role="status" style="margin-bottom: 1.5rem;">
+        <div class="farmer-toast-left">
+          <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="color: var(--pista-600);">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+            <polyline points="22 4 12 14.01 9 11.01"></polyline>
+          </svg>
+          <span>@Model.SaveSuccessMessage</span>
+        </div>
+      </div>
+    }
+
+    <!-- Producer Details Card -->
+    <section class="user-details-hero-card">
+      <div class="user-hero-top">
+        <div class="user-brand-logo">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 30px; height: 30px;">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4" />
+          </svg>
+        </div>
+
+        <div class="user-hero-identity">
+          <h2 class="user-hero-name">@Model.FarmerName</h2>
+          <p class="user-hero-email">@Model.UserEmail</p>
+          <div class="user-badge-row">
+            <span class="verified-producer-pill">
+              <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width: 13px; height: 13px;">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+              Verified Producer
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div class="user-fields-grid">
+        <div class="user-field-group">
+          <label class="user-field-label" for="standaloneProfileName">Full Name</label>
+          <input
+            id="standaloneProfileName"
+            type="text"
+            name="FarmerName"
+            class="user-field-input"
+            value="@Model.FarmerName"
+          />
+        </div>
+
+        <div class="user-field-group">
+          <label class="user-field-label" for="standaloneProfileEmail">Email Address</label>
+          <input
+            id="standaloneProfileEmail"
+            type="email"
+            class="user-field-input user-field-readonly"
+            readonly
+            value="@Model.UserEmail"
+          />
+        </div>
+
+        <div class="user-field-group">
+          <label class="user-field-label" for="standaloneProfilePhone">Phone</label>
+          <input
+            id="standaloneProfilePhone"
+            type="tel"
+            name="Phone"
+            class="user-field-input"
+            value="@Model.Phone"
+          />
+        </div>
+      </div>
+
+      <div class="scroll-down-invitation">
+        <div class="scroll-prompt-text">
+          <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width: 18px; height: 18px; color: var(--pista-600);">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
+          </svg>
+          <span>Farm Registration located below</span>
+        </div>
+        <button
+          type="button"
+          class="btn-scroll-down"
+          onclick="document.getElementById('farmSectionTarget').scrollIntoView({ behavior: 'smooth' })"
+        >
+          <span>View Farm Details ↓</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- Farm Registration Card -->
+    <section class="farm-section-container" id="farmSectionTarget">
+      <div class="farm-registration-card" data-farm-reveal>
+        <div class="farm-card-header">
+          <div>
+            <h2>
+              <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 21h18M5 21V7l8-4 6 4v14M9 10h2m-2 4h2m4-4h2m-2 4h2"></path>
+              </svg>
+              Farm Details
+            </h2>
+            <p>Enter your agricultural parcel information</p>
+          </div>
+        </div>
+
+        <div class="current-location-box">
+          <div class="current-loc-header">
+            <div class="current-loc-title">
+              <h4>Auto-Detect Location</h4>
+              <p>Set your farm district and coordinates using GPS.</p>
+            </div>
+
+            <button
+              type="button"
+              class="btn-use-location"
+              data-gps-detect
+              data-coords-target="standaloneFarmCoords"
+              data-district-target="standaloneFarmDistrict"
+              data-badge-target="standaloneGeoBadge"
+              data-badge-text="standaloneGeoText"
+            >
+              <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width: 16px; height: 16px;">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="22" y1="12" x2="18" y2="12"></line>
+                <line x1="6" y1="12" x2="2" y2="12"></line>
+                <line x1="12" y1="6" x2="12" y2="2"></line>
+                <line x1="12" y1="22" x2="12" y2="18"></line>
+              </svg>
+              <span>Use Current Location</span>
+            </button>
+          </div>
+
+          <div id="standaloneGeoBadge" class="geo-success-badge" style="display: none;">
+            <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width: 16px; height: 16px;">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+            <span id="standaloneGeoText"></span>
+          </div>
+        </div>
+
+        <div class="farm-fields-grid">
+          <div class="farm-field-item">
+            <label class="farm-field-label" for="standaloneFarmName">Farm Name</label>
+            <input id="standaloneFarmName" type="text" name="FarmName" class="input-farm" value="@Model.FarmName" />
+          </div>
+
+          <div class="farm-field-item">
+            <label class="farm-field-label" for="standaloneFarmArea">Land Area</label>
+            <input id="standaloneFarmArea" type="text" name="FarmArea" class="input-farm" value="@Model.FarmArea" />
+          </div>
+
+          <div class="farm-field-item">
+            <label class="farm-field-label" for="standaloneFarmDistrict">District / Location</label>
+            <input id="standaloneFarmDistrict" type="text" name="FarmDistrict" class="input-farm" value="@Model.FarmDistrict" />
+          </div>
+
+          <div class="farm-field-item">
+            <label class="farm-field-label" for="standaloneFarmCoords">Coordinates</label>
+            <input id="standaloneFarmCoords" type="text" name="FarmCoords" class="input-farm input-coords-readonly" value="@Model.FarmCoords" />
+          </div>
+        </div>
+
+        <div class="farm-actions-row">
+          <button type="submit" class="btn-save-farm">
+            <span>Save Farm Details</span>
+          </button>
+        </div>
+      </div>
+    </section>
+  </form>
+</div>
